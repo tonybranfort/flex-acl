@@ -1,0 +1,25 @@
+{
+  "name": "http-req-auth",
+  "version": "1.0.0",
+  "description": "Determine if an http request is authorized based on a rules object",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test\\test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tonybranfort/http-req-auth.git"
+  },
+  "keywords": [
+    "authorization",
+    "api",
+    "rest",
+    "url"
+  ],
+  "author": "Tony Branfort",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tonybranfort/http-req-auth/issues"
+  },
+  "homepage": "https://github.com/tonybranfort/http-req-auth#readme"
+}

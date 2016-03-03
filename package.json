@@ -6,6 +6,10 @@
   "scripts": {
     "test": "mocha test\\test.js"
   },
+  "devDependencies": {
+    "mocha":"2.2.x",
+    "expect.js": "0.3.x"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tonybranfort/http-req-auth.git"

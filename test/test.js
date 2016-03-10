@@ -244,6 +244,45 @@ describe('http-req-auth',function(){
 
     }); 
 
+    it('should match on query parameters',function(done){
+      var getRules = function(callback) {
+        var rules = [
+          {code: 'ClientAll',
+           pathname:'/api/clients'},
+          {code: 'ClientLi1',
+           method: 'GET',
+           pathname:'/api/clients',
+           query: {filter: 'abc123'}},
+          {code: 'ClientLi2',
+           method: 'GET',
+           pathname:'/api/clients',
+           query: {filter: 'abc12'}},
+          {code: 'ClientLi3',
+           method: 'GET',
+           pathname:'/api/clients',
+           query: {sort: 'asc'}},
+          ];
+        return callback(null, rules); 
+      }; 
+
+      getRules(function(err, rules) {
+
+        var options = hra.getPropsOptionsFromRules(rules);
+        var req = {method: 'GET', pathname: '/api/clients'};
+
+        var getMatchedRules = hra.makeGetMatchedRulesFn(options); 
+
+        getMatchedRules(req, getRules, function (matchedRules) {
+          expect(matchedRules).to.have.length(1); 
+          expect(getCodes(matchedRules)).to.contain('ClientAll');
+          done();
+        });
+      });
+
+    }); 
+
+
+
   });
 });
 

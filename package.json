@@ -7,7 +7,7 @@
     "test": "mocha test\\test.js"
   },
   "dependencies": {
-    "apom": "1.0.x",
+    "filter-objects": "1.1.x",
     "underscore": "1.8.x"
   },
   "devDependencies": {

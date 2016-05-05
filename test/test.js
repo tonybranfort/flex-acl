@@ -282,6 +282,141 @@ describe('http-req-auth',function(){
     }); 
 
 
+  });
+
+  describe('makeIsAuthorized', function() {
+    
+    it('should make the isAuthorized fn without error',function(done){
+      var getRules = function(callback) {
+        var rules = [
+          {code: 'ClientLi',
+           method: 'GET',
+           pathname:'/api/clients'},
+          {code: 'ClientCr',
+           method: 'POST',
+           pathname:'/api/clients'},
+          ];
+        return callback(null, rules); 
+      }; 
+
+      var getCodes = function(req, callback) {
+        // returns the access codes for the user making the http request
+        var userCodes = {
+          admin: [".*"],           // Access to all rules
+          paul:  ["Client.."],         // Access to all "Clientxx" rules
+          frank: ["Lada","ClientCr"],
+          jane:  ["ClientLi"],   // Access to just ClientLi rules
+          dot:  ["Client"],   // Access to just Client rules (none)
+          lola: ["aClientCr"],
+          baris: ["clientcr"],
+          borka: ["ClientCra"],
+          bolla: ["Client..."]
+        };
+
+        if(req && req.user && req.user.id && userCodes.hasOwnProperty(req.user.id)) {
+          return callback(null, userCodes[req.user.id]);
+        } else { 
+          return callback('Error: User access code does not exist'); 
+        }
+      };
+
+      var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+
+      var req = {method: 'POST', pathname: '/api/clients', user: {id:'paul'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).to.be(null); 
+        expect(passes).to.be(true); 
+      });
+
+      req = {method: 'POST', pathname: '/api/clients', user: {id:'admin'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).to.be(null); 
+        expect(passes).to.be(true); 
+      });
+
+      req = {method: 'POST', pathname: '/api/clients', user: {id:'jane'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).not.to.be(null); 
+        expect(passes).to.be(undefined); 
+      });
+
+      req = {method: 'POST', pathname: '/api/clients', user: {id:'dot'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).not.to.be(null); 
+        expect(passes).to.be(undefined); 
+      });
+
+      req = {method: 'POST', pathname: '/api/clients', user: {id:'frank'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).to.be(null); 
+        expect(passes).to.be(true); 
+      });
+
+      req = {method: 'POST', pathname: '/api/clients', user: {id:'lola'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).not.to.be(null); 
+        expect(passes).to.be(undefined); 
+      });
+
+      req = {method: 'POST', pathname: '/api/clients', user: {id:'boris'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).not.to.be(null); 
+        expect(passes).to.be(undefined); 
+      });
+
+      req = {method: 'POST', pathname: '/api/clients', user: {id:'borka'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).not.to.be(null); 
+        expect(passes).to.be(undefined); 
+      });
+
+      req = {method: 'POST', pathname: '/api/clients', user: {id:'bolla'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).not.to.be(null); 
+        expect(passes).to.be(undefined); 
+        done();
+      });
+
+    }); 
+
+
+    it('should not pass if no rules match',function(done){
+      var getRules = function(callback) {
+        var rules = [
+          {code: 'ClientLi',
+           method: 'GET',
+           pathname:'/api/clients'},
+          {code: 'ClientCr',
+           method: 'POST',
+           pathname:'/api/clients'},
+          ];
+        return callback(null, rules); 
+      }; 
+
+      var getCodes = function(req, callback) {
+        // returns the access codes for the user making the http request
+        var userCodes = {
+          admin: [".*"]           // Access to all rules
+        };
+
+        if(req && req.user && req.user.id && userCodes.hasOwnProperty(req.user.id)) {
+          return callback(null, userCodes[req.user.id]);
+        } else { 
+          return callback('Error: User access code does not exist'); 
+        }
+      };
+
+      var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+
+      var req = {method: 'POST', pathname: '/api/client', user: {id:'admin'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).not.to.be(null); 
+        expect(passes).to.be(undefined); 
+        done();
+      });
+
+    }); 
+
 
   });
 });

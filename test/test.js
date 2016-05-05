@@ -267,7 +267,7 @@ describe('http-req-auth',function(){
 
       getRules(function(err, rules) {
 
-        var options = hra.getPropsOptionsFromRules(rules);
+        var options = hra.getOptions(rules);
         var req = {method: 'GET', pathname: '/api/clients'};
 
         var getMatchedRules = hra.makeGetMatchedRulesFn(options); 

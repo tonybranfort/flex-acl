@@ -215,7 +215,8 @@ describe('http-req-auth',function(){
         return callback(null, rules); 
       }; 
 
-      var getMatchedRules = hra.makeGetMatchedRulesFn({}, getVariables); 
+      var getMatchedRules = hra.makeGetMatchedRulesFn({}, 
+          {'getVariables': getVariables}); 
 
       var req = {method: 'POST', pathname: '/api/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
@@ -267,11 +268,21 @@ describe('http-req-auth',function(){
 
       getRules(function(err, rules) {
 
-        var options = hra.getOptions(rules);
+        var propsToTest = hra.getPropsFromRules(rules);
+        var getMatchedRules = hra.makeGetMatchedRulesFn(propsToTest); 
+
         var req = {method: 'GET', pathname: '/api/clients'};
-
-        var getMatchedRules = hra.makeGetMatchedRulesFn(options); 
-
+        getMatchedRules(req, getRules, function (err, matchedRules) {
+          expect(matchedRules).to.have.length(1); 
+          expect(getCodes(matchedRules)).to.contain('ClientAll');
+        });
+        req = {method: 'GET', pathname: '/api/clients',query:{filter:'abc123'}};
+        getMatchedRules(req, getRules, function (err, matchedRules) {
+          expect(matchedRules).to.have.length(2); 
+          expect(getCodes(matchedRules)).to.contain('ClientAll');
+          expect(getCodes(matchedRules)).to.contain('ClientLi1');
+        });
+        req = {method: 'GET', pathname: '/api/clients',query:{filter:'bogus'}};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(1); 
           expect(getCodes(matchedRules)).to.contain('ClientAll');
@@ -516,8 +527,168 @@ describe('http-req-auth',function(){
     });  
 
 
+  }); // end of describe makeIsAuthorized
 
-  });
+  describe('options', function() {
+
+    var getRules = function(callback) {
+      var rules = [
+        {code: 'ClientAll',
+         pathname:'/api/clients'},
+        {code: 'ClientLi1',
+         method: 'GET',
+         pathname:'/api/clients',
+         query: {filter: 'abc123'}},
+        {code: 'ClientLi2',
+         method: 'GET',
+         pathname:'/api/clients',
+         href: '/api/clients?filter=abc12'},
+        {code: 'ClientLi3',
+         method: 'POST',
+         pathname:'/api/clients'},
+        ];
+      return callback(null, rules); 
+    }; 
+
+    var getCodes = function(req, callback) {
+      // returns the access codes for the user making the http request
+      var userCodes = {
+        admin: [".*"],           // Access to all rules
+        bob1: ["ClientLi1"],
+        bob2: ["ClientLi2"]
+      };
+
+      if(req && req.user && req.user.id && userCodes.hasOwnProperty(req.user.id)) {
+        return callback(null, userCodes[req.user.id]);
+      } else { 
+        return callback('Error: User access code does not exist'); 
+      }
+    };
+
+    it('should default to method and pathname w/o propsToTest', 
+      function(done) {
+
+      var req = {
+        method: 'GET', 
+        pathname: '/api/clients', 
+        user: {id:'bob1'},
+      };
+
+      var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+      isAuthorized(req, function (err, passes) {
+        expect(err).not.to.be(null); 
+        expect(passes).to.be(undefined); 
+        done();
+      });
+    });  
+
+    it('should use the rules properties if rules are passed in', 
+      function(done) {
+
+      getRules(function(err, rules) {
+        var propsToTest = hra.getPropsFromRules(rules);
+        expect(propsToTest.length).to.be(4) ;
+        expect(propsToTest).to.contain('method');
+        expect(propsToTest).to.contain('pathname');
+        expect(propsToTest).to.contain('href');
+        expect(propsToTest).to.contain('query.filter');
+
+        var req = {
+          method: 'GET', 
+          pathname: '/api/clients', 
+          user: {id:'bob1'},
+        };
+
+        var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+        isAuthorized(req, function (err, passes) {
+          expect(err).not.to.be(null); 
+          expect(passes).to.be(undefined); 
+          done();
+        });
+      });  
+
+    }); 
+
+    it('should set options for a property', 
+      function(done) {
+
+      getRules(function(err, rules) {
+        // var propsToTest = hra.getPropsFromRules(rules);
+        var propsToTest = 
+          [
+           'query.filter',
+           'query.sort', 
+           'method',
+           {'name':'pathname', regExpMatch:false}
+          ];
+
+        var isAuthorized = 
+          hra.makeIsAuthorized(getRules, getCodes, propsToTest); 
+        var req = {
+          method: 'GET', 
+          pathname: '/api/CLIENTS', 
+          user: {id:'admin'},
+        };
+        isAuthorized(req, function (err, passes) {
+          expect(err).not.to.be(null); 
+          expect(passes).to.be(undefined); 
+        });
+
+        var rq = {
+          method: 'GET', 
+          pathname: '/api/clients', 
+          user: {id:'admin'},
+        };
+        isAuthorized(rq, function (err, passes) {
+          expect(err).to.be(null); 
+          expect(passes).to.be(true); 
+          done();
+        });
+
+      });  
+
+    }); // end of it
+
+
+    it('should set default options', 
+      function(done) {
+
+      getRules(function(err, rules) {
+        var propsToTest = hra.getPropsFromRules(rules);
+
+        var defaultOptions = {regExpMatch: false};
+
+        var isAuthorized = 
+          hra.makeIsAuthorized(getRules, getCodes, propsToTest, defaultOptions); 
+        var req = {
+          method: 'GET', 
+          pathname: '/api/CLIENTS', 
+          user: {id:'admin'},
+        };
+        isAuthorized(req, function (err, passes) {
+          expect(err).not.to.be(null); 
+          expect(passes).to.be(undefined); 
+        });
+
+        var rq = {
+          method: 'GET', 
+          pathname: '/api/clients', 
+          user: {id:'admin'},
+        };
+        isAuthorized(rq, function (err, passes) {
+          expect(err).to.be(null); 
+          expect(passes).to.be(true); 
+          done();
+        });
+
+      });  
+
+    }); // end of it 
+
+  }); // end of describe 'options'
+
+
+
 });
 
 

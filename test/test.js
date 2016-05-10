@@ -216,7 +216,7 @@ describe('http-req-auth',function(){
       }; 
 
       var getMatchedRules = hra.makeGetMatchedRulesFn({}, 
-          {'getVariables': getVariables}); 
+          {variablesInTObj:true, 'getVariables': getVariables}); 
 
       var req = {method: 'POST', pathname: '/api/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {

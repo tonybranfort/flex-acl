@@ -1,14 +1,14 @@
 {
-  "name": "http-req-auth",
+  "name": "flex-acl",
   "version": "1.0.0",
-  "description": "Determine if an http request is authorized based on a rules object",
-  "main": "index.js",
+  "description": "Easy to implement, very flexible json based acl",
+  "main": "lib/index.js",
   "scripts": {
     "test": "mocha test\\test.js"
   },
   "dependencies": {
     "filter-objects": "1.1.x",
-    "underscore": "1.8.x"
+    "lodash": "4.x.x"
   },
   "devDependencies": {
     "mocha":"2.2.x",
@@ -16,18 +16,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tonybranfort/http-req-auth.git"
+    "url": "git+https://github.com/tonybranfort/flex-acl.git"
   },
   "keywords": [
     "authorization",
     "api",
     "rest",
-    "url"
+    "url",
+    "acl",
+    "authorize"
   ],
   "author": "Tony Branfort",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tonybranfort/http-req-auth/issues"
+    "url": "https://github.com/tonybranfort/flex-acl/issues"
   },
-  "homepage": "https://github.com/tonybranfort/http-req-auth#readme"
+  "homepage": "https://github.com/tonybranfort/flex-acl#readme"
 }

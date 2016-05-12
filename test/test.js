@@ -1,4 +1,4 @@
-var hra = require('../lib/index.js');
+var flexAcl = require('../lib/index.js');
 var expect = require('expect.js'); 
 
 var getCodes = function(rules) {
@@ -23,16 +23,18 @@ describe('http-req-auth',function(){
         var rules = [
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr',
            method: 'POST',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           ];
         return callback(null, rules); 
       }; 
-      var req = {method: 'POST', pathname: '/api/clients'};
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
 
-      var getMatchedRules = hra.makeGetMatchedRulesFn(); 
+      var getMatchedRules = flexAcl.makeGetMatchedRulesFn(); 
 
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
@@ -46,34 +48,38 @@ describe('http-req-auth',function(){
         var rules = [
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr',
            method: 'POST',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr2',
            method: 'POS',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr3',
            method: 'PoST',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           ];
         return callback(null, rules); 
       }; 
 
-      var getMatchedRules = hra.makeGetMatchedRulesFn(); 
+      var getMatchedRules = flexAcl.makeGetMatchedRulesFn(); 
 
-      var req = {method: 'POST', pathname: '/api/clients'};
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
         expect(getCodes(matchedRules)).to.contain('ClientCr');
       });
       
-      req = {method: 'post', pathname: '/api/clients'};
+      req = {method: 'post', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(0); 
       });
       
-      req = {method: 'PO', pathname: '/api/clients'};
+      req = {method: 'PO', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(0); 
         done();
@@ -85,19 +91,22 @@ describe('http-req-auth',function(){
       var getRules = function(callback) {
         var rules = [
           {code: 'ClientAll',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr',
            method: 'POST',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           ];
         return callback(null, rules); 
       }; 
-      var req = {method: 'POST', pathname: '/api/clients'};
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
 
-      var getMatchedRules = hra.makeGetMatchedRulesFn(); 
+      var getMatchedRules = flexAcl.makeGetMatchedRulesFn(); 
 
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
@@ -112,30 +121,34 @@ describe('http-req-auth',function(){
         var rules = [
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr',
            method: 'POST',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr2',
            method: 'POST',
-           pathname:'/api/client'},
+           baseUrl: '/api',
+           path:'/client'},
           {code: 'ClientCr3',
            method: 'POST',
-           pathname:'/api/clIENts'},
+           baseUrl: '/api',
+           path:'/clIEnts'},
           ];
         return callback(null, rules); 
       }; 
 
-      var getMatchedRules = hra.makeGetMatchedRulesFn(); 
+      var getMatchedRules = flexAcl.makeGetMatchedRulesFn(); 
 
-      var req = {method: 'POST', pathname: '/api/clients'};
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
         expect(getCodes(matchedRules)).to.contain('ClientCr');
         expect(getCodes(matchedRules)).to.contain('ClientCr3');
       });
       
-      req = {method: 'POST', pathname: '/API/CLIENTS'};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
         expect(getCodes(matchedRules)).to.contain('ClientCr');
@@ -155,39 +168,42 @@ describe('http-req-auth',function(){
       var getRules = function(callback) {
         var rules = [
           {code: 'ClientAll',
-           pathname:'/api/clients.*'},
+           baseUrl: '/api',
+           path: '/clients.*'},
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr1',
            method: 'POST',
-           pathname:'/api/clients/2[a-z][0-9]'},
+           baseUrl: '/api',
+           path: '/clients/2[a-z][0-9]'},
           ];
         return callback(null, rules); 
       }; 
 
-      var getMatchedRules = hra.makeGetMatchedRulesFn(); 
+      var getMatchedRules = flexAcl.makeGetMatchedRulesFn(); 
 
-      var req = {method: 'POST', pathname: '/api/clients'};
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
         expect(getCodes(matchedRules)).to.contain('ClientAll');
       });
 
-      req = {method: 'POST', pathname: '/api/clients/2'};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients/2' };
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
         expect(getCodes(matchedRules)).to.contain('ClientAll');
       });
 
-      req = {method: 'POST', pathname: '/api/clients/2b7'};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients/2b7'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
         expect(getCodes(matchedRules)).to.contain('ClientAll');
         expect(getCodes(matchedRules)).to.contain('ClientCr1');
       });
 
-      req = {method: 'POST', pathname: 'api/clients/2b7'}; // missing initial '/'
+      req = {method: 'POST', baseUrl: '/api', path:'clients2b7'}; // missing initial '/'
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(0); 
         done();
@@ -204,40 +220,44 @@ describe('http-req-auth',function(){
       var getRules = function(callback) {
         var rules = [
           {code: 'ClientAll',
-           pathname:'/api/clients|all|'},
+           baseUrl: '/api',
+           path:'/clients|all|'},
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr1',
            method: 'POST',
-           pathname:'/api/clients/|clientNbr|'},
+           baseUrl: '/api',
+           path:'/clients/|clientNbr|'},
+           // pathname:'/api/clients/|clientNbr|'},
           ];
         return callback(null, rules); 
       }; 
 
-      var getMatchedRules = hra.makeGetMatchedRulesFn({}, 
+      var getMatchedRules = flexAcl.makeGetMatchedRulesFn({}, 
           {variablesInTObj:true, 'getVariables': getVariables}); 
 
-      var req = {method: 'POST', pathname: '/api/clients'};
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
         expect(getCodes(matchedRules)).to.contain('ClientAll');
       });
 
-      req = {method: 'POST', pathname: '/api/clients/2'};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients/2'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
         expect(getCodes(matchedRules)).to.contain('ClientAll');
       });
 
-      req = {method: 'POST', pathname: '/api/clients/2b7'};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients/2b7'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
         expect(getCodes(matchedRules)).to.contain('ClientAll');
         expect(getCodes(matchedRules)).to.contain('ClientCr1');
       });
 
-      req = {method: 'POST', pathname: 'api/clients/2b7'}; // missing initial '/'
+      req = {method: 'POST', baseUrl: '/api', path:'clients2b7'}; // missing initial '/'
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(0); 
         done();
@@ -249,18 +269,22 @@ describe('http-req-auth',function(){
       var getRules = function(callback) {
         var rules = [
           {code: 'ClientAll',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientLi1',
            method: 'GET',
-           pathname:'/api/clients',
+           baseUrl: '/api',
+           path:'/clients',
            query: {filter: 'abc123'}},
           {code: 'ClientLi2',
            method: 'GET',
-           pathname:'/api/clients',
+           baseUrl: '/api',
+           path:'/clients',
            query: {filter: 'abc12'}},
           {code: 'ClientLi3',
            method: 'GET',
-           pathname:'/api/clients',
+           baseUrl: '/api',
+           path:'/clients',
            query: {sort: 'asc'}},
           ];
         return callback(null, rules); 
@@ -268,21 +292,21 @@ describe('http-req-auth',function(){
 
       getRules(function(err, rules) {
 
-        var propsToTest = hra.getPropsFromRules(rules);
-        var getMatchedRules = hra.makeGetMatchedRulesFn(propsToTest); 
+        var propsToTest = flexAcl.getPropsFromRules(rules);
+        var getMatchedRules = flexAcl.makeGetMatchedRulesFn(propsToTest); 
 
-        var req = {method: 'GET', pathname: '/api/clients'};
+        var req = {method: 'GET', baseUrl: '/api', path:'/clients'};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(1); 
           expect(getCodes(matchedRules)).to.contain('ClientAll');
         });
-        req = {method: 'GET', pathname: '/api/clients',query:{filter:'abc123'}};
+        req = {method: 'GET', baseUrl: '/api', path:'/clients',query:{filter:'abc123'}};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(2); 
           expect(getCodes(matchedRules)).to.contain('ClientAll');
           expect(getCodes(matchedRules)).to.contain('ClientLi1');
         });
-        req = {method: 'GET', pathname: '/api/clients',query:{filter:'bogus'}};
+        req = {method: 'GET', baseUrl: '/api', path:'/clients',query:{filter:'bogus'}};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(1); 
           expect(getCodes(matchedRules)).to.contain('ClientAll');
@@ -302,10 +326,12 @@ describe('http-req-auth',function(){
         var rules = [
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr',
            method: 'POST',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           ];
         return callback(null, rules); 
       }; 
@@ -331,57 +357,57 @@ describe('http-req-auth',function(){
         }
       };
 
-      var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
 
-      var req = {method: 'POST', pathname: '/api/clients', user: {id:'paul'}};
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'paul'}};
       isAuthorized(req, function (err, passes) {
         expect(err).to.be(null); 
         expect(passes).to.be(true); 
       });
 
-      req = {method: 'POST', pathname: '/api/clients', user: {id:'admin'}};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'admin'}};
       isAuthorized(req, function (err, passes) {
         expect(err).to.be(null); 
         expect(passes).to.be(true); 
       });
 
-      req = {method: 'POST', pathname: '/api/clients', user: {id:'jane'}};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'jane'}};
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
       });
 
-      req = {method: 'POST', pathname: '/api/clients', user: {id:'dot'}};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'dot'}};
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
       });
 
-      req = {method: 'POST', pathname: '/api/clients', user: {id:'frank'}};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'frank'}};
       isAuthorized(req, function (err, passes) {
         expect(err).to.be(null); 
         expect(passes).to.be(true); 
       });
 
-      req = {method: 'POST', pathname: '/api/clients', user: {id:'lola'}};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'lola'}};
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
       });
 
-      req = {method: 'POST', pathname: '/api/clients', user: {id:'boris'}};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'boris'}};
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
       });
 
-      req = {method: 'POST', pathname: '/api/clients', user: {id:'borka'}};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'borka'}};
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
       });
 
-      req = {method: 'POST', pathname: '/api/clients', user: {id:'bolla'}};
+      req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'bolla'}};
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
@@ -396,10 +422,12 @@ describe('http-req-auth',function(){
         var rules = [
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr',
            method: 'POST',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           ];
         return callback(null, rules); 
       }; 
@@ -417,7 +445,7 @@ describe('http-req-auth',function(){
         }
       };
 
-      var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
 
       var req = {method: 'POST', pathname: '/api/client', user: {id:'admin'}};
       isAuthorized(req, function (err, passes) {
@@ -436,10 +464,12 @@ describe('http-req-auth',function(){
         var rules = [
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr',
            method: 'POST',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           ];
         setTimeout(function() {
           return callback(null, rules);
@@ -466,9 +496,9 @@ describe('http-req-auth',function(){
           }, 3000); 
       };
 
-      var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
 
-      var req = {method: 'POST', pathname: '/api/clients', user: {id:'paul'}};
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'paul'}};
       isAuthorized(req, function (err, passes) {
         expect(err).to.be(null); 
         expect(passes).to.be(true); 
@@ -485,10 +515,12 @@ describe('http-req-auth',function(){
         var rules = [
           {code: 'ClientLi',
            method: 'GET',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           {code: 'ClientCr',
            method: 'POST',
-           pathname:'/api/clients'},
+           baseUrl: '/api',
+           path:'/clients'},
           ];
         setTimeout(function() {
           return callback(null, rules);
@@ -515,9 +547,9 @@ describe('http-req-auth',function(){
           }, 2000); 
       };
 
-      var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
 
-      var req = {method: 'POST', pathname: '/api/clients', user: {id:'nada'}};
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'nada'}};
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
@@ -534,18 +566,22 @@ describe('http-req-auth',function(){
     var getRules = function(callback) {
       var rules = [
         {code: 'ClientAll',
-         pathname:'/api/clients'},
+         baseUrl:'/api',
+         path: '/clients'},
         {code: 'ClientLi1',
          method: 'GET',
-         pathname:'/api/clients',
+         baseUrl:'/api',
+         path: '/clients',
          query: {filter: 'abc123'}},
         {code: 'ClientLi2',
          method: 'GET',
-         pathname:'/api/clients',
+         baseUrl:'/api',
+         path: '/clients',
          href: '/api/clients?filter=abc12'},
         {code: 'ClientLi3',
          method: 'POST',
-         pathname:'/api/clients'},
+         baseUrl:'/api',
+         path: '/clients'},
         ];
       return callback(null, rules); 
     }; 
@@ -570,11 +606,12 @@ describe('http-req-auth',function(){
 
       var req = {
         method: 'GET', 
-        pathname: '/api/clients', 
+        baseUrl: '/api',
+        path: '/clients',
         user: {id:'bob1'},
       };
 
-      var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
@@ -586,20 +623,22 @@ describe('http-req-auth',function(){
       function(done) {
 
       getRules(function(err, rules) {
-        var propsToTest = hra.getPropsFromRules(rules);
-        expect(propsToTest.length).to.be(4) ;
+        var propsToTest = flexAcl.getPropsFromRules(rules);
+        expect(propsToTest.length).to.be(5) ;
         expect(propsToTest).to.contain('method');
-        expect(propsToTest).to.contain('pathname');
+        expect(propsToTest).to.contain('path');
+        expect(propsToTest).to.contain('baseUrl');
         expect(propsToTest).to.contain('href');
         expect(propsToTest).to.contain('query.filter');
 
         var req = {
           method: 'GET', 
-          pathname: '/api/clients', 
+          baseUrl: '/api',
+          path: '/clients',
           user: {id:'bob1'},
         };
 
-        var isAuthorized = hra.makeIsAuthorized(getRules, getCodes); 
+        var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
         isAuthorized(req, function (err, passes) {
           expect(err).not.to.be(null); 
           expect(passes).to.be(undefined); 
@@ -613,20 +652,21 @@ describe('http-req-auth',function(){
       function(done) {
 
       getRules(function(err, rules) {
-        // var propsToTest = hra.getPropsFromRules(rules);
+        // var propsToTest = flexAcl.getPropsFromRules(rules);
         var propsToTest = 
           [
            'query.filter',
            'query.sort', 
            'method',
-           {'name':'pathname', regExpMatch:false}
+           {'name':'path', regExpMatch:false}
           ];
 
         var isAuthorized = 
-          hra.makeIsAuthorized(getRules, getCodes, propsToTest); 
+          flexAcl.makeIsAuthorized(getRules, getCodes, propsToTest); 
         var req = {
           method: 'GET', 
-          pathname: '/api/CLIENTS', 
+          baseUrl: '/api',
+          path: '/CLIENTS',
           user: {id:'admin'},
         };
         isAuthorized(req, function (err, passes) {
@@ -636,7 +676,8 @@ describe('http-req-auth',function(){
 
         var rq = {
           method: 'GET', 
-          pathname: '/api/clients', 
+          baseUrl: '/api',
+          path: '/clients',
           user: {id:'admin'},
         };
         isAuthorized(rq, function (err, passes) {
@@ -654,15 +695,16 @@ describe('http-req-auth',function(){
       function(done) {
 
       getRules(function(err, rules) {
-        var propsToTest = hra.getPropsFromRules(rules);
+        var propsToTest = flexAcl.getPropsFromRules(rules);
 
         var defaultOptions = {regExpMatch: false};
 
         var isAuthorized = 
-          hra.makeIsAuthorized(getRules, getCodes, propsToTest, defaultOptions); 
+          flexAcl.makeIsAuthorized(getRules, getCodes, propsToTest, defaultOptions); 
         var req = {
           method: 'GET', 
-          pathname: '/api/CLIENTS', 
+          baseUrl: '/api',
+          path: '/CLIENTS',
           user: {id:'admin'},
         };
         isAuthorized(req, function (err, passes) {
@@ -672,7 +714,8 @@ describe('http-req-auth',function(){
 
         var rq = {
           method: 'GET', 
-          pathname: '/api/clients', 
+          baseUrl: '/api',
+          path: '/clients',
           user: {id:'admin'},
         };
         isAuthorized(rq, function (err, passes) {

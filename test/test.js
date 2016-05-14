@@ -211,16 +211,13 @@ describe('http-req-auth',function(){
     }); 
 
     it('should match on path allowing variables',function(done){
-      var getVariables = function(callback) {
-        var vars = {all: '.*', clientNbr: '2[a-z][0-9]'};
-        return callback(null, vars);
-      };
+      var variables = {all: '.*', clientNbr: '2[a-z][0-9]'};
 
       var getRules = function(callback) {
         var rules = [
           {code: 'ClientAll',
            baseUrl: '/api',
-           path:'/clients|all|'},
+           path:'/client~all#'},
           {code: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
@@ -228,13 +225,13 @@ describe('http-req-auth',function(){
           {code: 'ClientCr1',
            method: 'POST',
            baseUrl: '/api',
-           path:'/clients/|clientNbr|'},
+           path:'/clients/~clientNbr#'},
           ];
         return callback(null, rules); 
       }; 
 
       var getMatchedRules = flexAcl.makeGetMatchedRulesFn({}, 
-          {variablesInTObj:true, 'getVariables': getVariables}); 
+          {variablesInTObj:true, 'variables': variables}); 
 
       var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {

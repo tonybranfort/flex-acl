@@ -1,11 +1,11 @@
 var flexAcl = require('../lib/index.js');
 var expect = require('expect.js'); 
 
-var getCodes = function(rules) {
+var getIdsFromRules = function(rules) {
   // assist function for testing - takes an array (rules) and 
-  //   returns an array of just the 'code' property values
+  //   returns an array of just the 'id' property values
   return rules.map(function(el) {
-    return el.code; 
+    return el.id; 
   }); 
 };
 
@@ -21,11 +21,11 @@ describe('http-req-auth',function(){
     it('should match on method',function(done){
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr',
+          {id: 'ClientCr',
            method: 'POST',
            baseUrl: '/api',
            path:'/clients'},
@@ -38,7 +38,7 @@ describe('http-req-auth',function(){
 
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
-        expect(getCodes(matchedRules)).to.contain('ClientCr');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientCr');
         done();
       });
     }); 
@@ -46,19 +46,19 @@ describe('http-req-auth',function(){
     it('should match on method with case sensitive',function(done){
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr',
+          {id: 'ClientCr',
            method: 'POST',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr2',
+          {id: 'ClientCr2',
            method: 'POS',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr3',
+          {id: 'ClientCr3',
            method: 'PoST',
            baseUrl: '/api',
            path:'/clients'},
@@ -71,7 +71,7 @@ describe('http-req-auth',function(){
       var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
-        expect(getCodes(matchedRules)).to.contain('ClientCr');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientCr');
       });
       
       req = {method: 'post', baseUrl: '/api', path:'/clients'};
@@ -90,14 +90,14 @@ describe('http-req-auth',function(){
     it('should match on path',function(done){
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientAll',
+          {id: 'ClientAll',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr',
+          {id: 'ClientCr',
            method: 'POST',
            baseUrl: '/api',
            path:'/clients'},
@@ -110,8 +110,8 @@ describe('http-req-auth',function(){
 
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
-        expect(getCodes(matchedRules)).to.contain('ClientAll');
-        expect(getCodes(matchedRules)).to.contain('ClientCr');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientCr');
         done();
       });
     }); 
@@ -119,19 +119,19 @@ describe('http-req-auth',function(){
     it('should match on path case INsensitive',function(done){
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr',
+          {id: 'ClientCr',
            method: 'POST',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr2',
+          {id: 'ClientCr2',
            method: 'POST',
            baseUrl: '/api',
            path:'/client'},
-          {code: 'ClientCr3',
+          {id: 'ClientCr3',
            method: 'POST',
            baseUrl: '/api',
            path:'/clIEnts'},
@@ -144,15 +144,15 @@ describe('http-req-auth',function(){
       var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
-        expect(getCodes(matchedRules)).to.contain('ClientCr');
-        expect(getCodes(matchedRules)).to.contain('ClientCr3');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientCr');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientCr3');
       });
       
       req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
-        expect(getCodes(matchedRules)).to.contain('ClientCr');
-        expect(getCodes(matchedRules)).to.contain('ClientCr3'); 
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientCr');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientCr3'); 
       });
       
       req = {method: 'POST', path: '/api/clien'};
@@ -166,14 +166,14 @@ describe('http-req-auth',function(){
     it('should match on path with regular expressions',function(done){
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientAll',
+          {id: 'ClientAll',
            baseUrl: '/api',
            path: '/clients.*'},
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr1',
+          {id: 'ClientCr1',
            method: 'POST',
            baseUrl: '/api',
            path: '/clients/2[a-z][0-9]'},
@@ -186,20 +186,20 @@ describe('http-req-auth',function(){
       var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
-        expect(getCodes(matchedRules)).to.contain('ClientAll');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
       });
 
       req = {method: 'POST', baseUrl: '/api', path:'/clients/2' };
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
-        expect(getCodes(matchedRules)).to.contain('ClientAll');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
       });
 
       req = {method: 'POST', baseUrl: '/api', path:'/clients/2b7'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
-        expect(getCodes(matchedRules)).to.contain('ClientAll');
-        expect(getCodes(matchedRules)).to.contain('ClientCr1');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientCr1');
       });
 
       req = {method: 'POST', baseUrl: '/api', path:'clients2b7'}; // missing initial '/'
@@ -215,14 +215,14 @@ describe('http-req-auth',function(){
 
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientAll',
+          {id: 'ClientAll',
            baseUrl: '/api',
            path:'/client~all#'},
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr1',
+          {id: 'ClientCr1',
            method: 'POST',
            baseUrl: '/api',
            path:'/clients/~clientNbr#'},
@@ -236,20 +236,20 @@ describe('http-req-auth',function(){
       var req = {method: 'POST', baseUrl: '/api', path:'/clients'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
-        expect(getCodes(matchedRules)).to.contain('ClientAll');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
       });
 
       req = {method: 'POST', baseUrl: '/api', path:'/clients/2'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(1); 
-        expect(getCodes(matchedRules)).to.contain('ClientAll');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
       });
 
       req = {method: 'POST', baseUrl: '/api', path:'/clients/2b7'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(2); 
-        expect(getCodes(matchedRules)).to.contain('ClientAll');
-        expect(getCodes(matchedRules)).to.contain('ClientCr1');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
+        expect(getIdsFromRules(matchedRules)).to.contain('ClientCr1');
       });
 
       req = {method: 'POST', baseUrl: '/api', path:'clients2b7'}; // missing initial '/'
@@ -263,20 +263,20 @@ describe('http-req-auth',function(){
     it('should match on query parameters',function(done){
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientAll',
+          {id: 'ClientAll',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientLi1',
+          {id: 'ClientLi1',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients',
            query: {filter: 'abc123'}},
-          {code: 'ClientLi2',
+          {id: 'ClientLi2',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients',
            query: {filter: 'abc12'}},
-          {code: 'ClientLi3',
+          {id: 'ClientLi3',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients',
@@ -293,18 +293,18 @@ describe('http-req-auth',function(){
         var req = {method: 'GET', baseUrl: '/api', path:'/clients'};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(1); 
-          expect(getCodes(matchedRules)).to.contain('ClientAll');
+          expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
         });
         req = {method: 'GET', baseUrl: '/api', path:'/clients',query:{filter:'abc123'}};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(2); 
-          expect(getCodes(matchedRules)).to.contain('ClientAll');
-          expect(getCodes(matchedRules)).to.contain('ClientLi1');
+          expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
+          expect(getIdsFromRules(matchedRules)).to.contain('ClientLi1');
         });
         req = {method: 'GET', baseUrl: '/api', path:'/clients',query:{filter:'bogus'}};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(1); 
-          expect(getCodes(matchedRules)).to.contain('ClientAll');
+          expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
           done();
         });
       });
@@ -314,15 +314,15 @@ describe('http-req-auth',function(){
     it('should not include rules w properties missing from req',function(done){
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientSort',
+          {id: 'ClientSort',
            baseUrl: '/api',
            path:'/clients',
            'query':{'sort':'.*'}},
-          {code: 'ClientFilter',
+          {id: 'ClientFilter',
            baseUrl: '/api',
            path:'/clients',
            'query':{'filter':'.*'}},
-          {code: 'ClientAll',
+          {id: 'ClientAll',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
@@ -338,20 +338,20 @@ describe('http-req-auth',function(){
         var req = {method: 'GET', baseUrl: '/api', path:'/clients'};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(1); 
-          expect(getCodes(matchedRules)).to.contain('ClientAll');
+          expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
           // done();
         });
         req = {method: 'GET', baseUrl: '/api', path:'/clients',query:{filter:'abc123'}};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(2); 
-          expect(getCodes(matchedRules)).to.contain('ClientAll');
-          expect(getCodes(matchedRules)).to.contain('ClientFilter');
+          expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
+          expect(getIdsFromRules(matchedRules)).to.contain('ClientFilter');
         });
         req = {method: 'GET', baseUrl: '/api', path:'/clients',query:{sort:'bogus'}};
         getMatchedRules(req, getRules, function (err, matchedRules) {
           expect(matchedRules).to.have.length(2); 
-          expect(getCodes(matchedRules)).to.contain('ClientAll');
-          expect(getCodes(matchedRules)).to.contain('ClientSort');
+          expect(getIdsFromRules(matchedRules)).to.contain('ClientAll');
+          expect(getIdsFromRules(matchedRules)).to.contain('ClientSort');
           done();
         });
 
@@ -365,11 +365,11 @@ describe('http-req-auth',function(){
     it('should authorize various rules correctly',function(done){
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr',
+          {id: 'ClientCr',
            method: 'POST',
            baseUrl: '/api',
            path:'/clients'},
@@ -377,9 +377,9 @@ describe('http-req-auth',function(){
         return callback(null, rules); 
       }; 
 
-      var getCodes = function(req, callback) {
-        // returns the access codes for the user making the http request
-        var userCodes = {
+      var getIdsFromRules = function(req, callback) {
+        // returns the access ids for the user making the http request
+        var authzdAclIds = {
           admin: [".*"],           // Access to all rules
           paul:  ["Client.."],         // Access to all "Clientxx" rules
           frank: ["Lada","ClientCr"],
@@ -391,14 +391,14 @@ describe('http-req-auth',function(){
           bolla: ["Client..."]
         };
 
-        if(req && req.user && req.user.id && userCodes.hasOwnProperty(req.user.id)) {
-          return callback(null, userCodes[req.user.id]);
+        if(req && req.user && req.user.id && authzdAclIds.hasOwnProperty(req.user.id)) {
+          return callback(null, authzdAclIds[req.user.id]);
         } else { 
-          return callback('Error: User access code does not exist'); 
+          return callback('Error: User access id does not exist'); 
         }
       };
 
-      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getIdsFromRules); 
 
       var req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'paul'}};
       isAuthorized(req, function (err, passes) {
@@ -461,11 +461,11 @@ describe('http-req-auth',function(){
     it('should not pass if no rules match',function(done){
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr',
+          {id: 'ClientCr',
            method: 'POST',
            baseUrl: '/api',
            path:'/clients'},
@@ -473,20 +473,20 @@ describe('http-req-auth',function(){
         return callback(null, rules); 
       }; 
 
-      var getCodes = function(req, callback) {
-        // returns the access codes for the user making the http request
-        var userCodes = {
+      var getIdsFromRules = function(req, callback) {
+        // returns the access ids for the user making the http request
+        var authzdAclIds = {
           admin: [".*"]           // Access to all rules
         };
 
-        if(req && req.user && req.user.id && userCodes.hasOwnProperty(req.user.id)) {
-          return callback(null, userCodes[req.user.id]);
+        if(req && req.user && req.user.id && authzdAclIds.hasOwnProperty(req.user.id)) {
+          return callback(null, authzdAclIds[req.user.id]);
         } else { 
-          return callback('Error: User access code does not exist'); 
+          return callback('Error: User access id does not exist'); 
         }
       };
 
-      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getIdsFromRules); 
 
       var req = {method: 'POST', path: '/api/client', user: {id:'admin'}};
       isAuthorized(req, function (err, passes) {
@@ -497,17 +497,17 @@ describe('http-req-auth',function(){
 
     });
 
-    it('should allow slow responses on getRules and getCodes ' + 
+    it('should allow slow responses on getRules and getIdsFromRules ' + 
        'and execute in parallel', function(done) {
       this.timeout(5000); 
 
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr',
+          {id: 'ClientCr',
            method: 'POST',
            baseUrl: '/api',
            path:'/clients'},
@@ -517,9 +517,9 @@ describe('http-req-auth',function(){
         },4000); 
       }; 
 
-      var getCodes = function(req, callback) {
-        // returns the access codes for the user making the http request
-        var userCodes = {
+      var getIdsFromRules = function(req, callback) {
+        // returns the access ids for the user making the http request
+        var authzdAclIds = {
           admin: [".*"],           // Access to all rules
           paul:  ["Client.."],         // Access to all "Clientxx" rules
           frank: ["Lada","ClientCr"],
@@ -533,11 +533,11 @@ describe('http-req-auth',function(){
 
         setTimeout(
           function() {
-            return callback(null, userCodes[req.user.id]);
+            return callback(null, authzdAclIds[req.user.id]);
           }, 3000); 
       };
 
-      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getIdsFromRules); 
 
       var req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'paul'}};
       isAuthorized(req, function (err, passes) {
@@ -548,17 +548,17 @@ describe('http-req-auth',function(){
 
     });  
 
-    it('should allow slow responses on getRules and getCodes ' + 
+    it('should allow slow responses on getRules and getIdsFromRules ' + 
        'with not authorized', function(done) {
       this.timeout(3000); 
 
       var getRules = function(callback) {
         var rules = [
-          {code: 'ClientLi',
+          {id: 'ClientLi',
            method: 'GET',
            baseUrl: '/api',
            path:'/clients'},
-          {code: 'ClientCr',
+          {id: 'ClientCr',
            method: 'POST',
            baseUrl: '/api',
            path:'/clients'},
@@ -568,9 +568,9 @@ describe('http-req-auth',function(){
         },2000); 
       }; 
 
-      var getCodes = function(req, callback) {
-        // returns the access codes for the user making the http request
-        var userCodes = {
+      var getIdsFromRules = function(req, callback) {
+        // returns the access ids for the user making the http request
+        var authzdAclIds = {
           admin: [".*"],           // Access to all rules
           paul:  ["Client.."],         // Access to all "Clientxx" rules
           frank: ["Lada","ClientCr"],
@@ -584,11 +584,11 @@ describe('http-req-auth',function(){
 
         setTimeout(
           function() {
-            return callback(null, userCodes[req.user.id]);
+            return callback(null, authzdAclIds[req.user.id]);
           }, 2000); 
       };
 
-      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getIdsFromRules); 
 
       var req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'nada'}};
       isAuthorized(req, function (err, passes) {
@@ -606,20 +606,20 @@ describe('http-req-auth',function(){
 
     var getRules = function(callback) {
       var rules = [
-        {code: 'ClientAll',
+        {id: 'ClientAll',
          baseUrl:'/api',
          path: '/clients'},
-        {code: 'ClientLi1',
+        {id: 'ClientLi1',
          method: 'GET',
          baseUrl:'/api',
          path: '/clients',
          query: {filter: 'abc123'}},
-        {code: 'ClientLi2',
+        {id: 'ClientLi2',
          method: 'GET',
          baseUrl:'/api',
          path: '/clients',
          href: '/api/clients?filter=abc12'},
-        {code: 'ClientLi3',
+        {id: 'ClientLi3',
          method: 'POST',
          baseUrl:'/api',
          path: '/clients'},
@@ -627,18 +627,18 @@ describe('http-req-auth',function(){
       return callback(null, rules); 
     }; 
 
-    var getCodes = function(req, callback) {
-      // returns the access codes for the user making the http request
-      var userCodes = {
+    var getIdsFromRules = function(req, callback) {
+      // returns the access ids for the user making the http request
+      var authzdAclIds = {
         admin: [".*"],           // Access to all rules
         bob1: ["ClientLi1"],
         bob2: ["ClientLi2"]
       };
 
-      if(req && req.user && req.user.id && userCodes.hasOwnProperty(req.user.id)) {
-        return callback(null, userCodes[req.user.id]);
+      if(req && req.user && req.user.id && authzdAclIds.hasOwnProperty(req.user.id)) {
+        return callback(null, authzdAclIds[req.user.id]);
       } else { 
-        return callback('Error: User access code does not exist'); 
+        return callback('Error: User access id does not exist'); 
       }
     };
 
@@ -652,7 +652,7 @@ describe('http-req-auth',function(){
         user: {id:'bob1'},
       };
 
-      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getIdsFromRules); 
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
@@ -679,7 +679,7 @@ describe('http-req-auth',function(){
           user: {id:'bob1'},
         };
 
-        var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
+        var isAuthorized = flexAcl.makeIsAuthorized(getRules, getIdsFromRules); 
         isAuthorized(req, function (err, passes) {
           expect(err).not.to.be(null); 
           expect(passes).to.be(undefined); 
@@ -703,7 +703,7 @@ describe('http-req-auth',function(){
           ];
 
         var isAuthorized = 
-          flexAcl.makeIsAuthorized(getRules, getCodes, propsToTest); 
+          flexAcl.makeIsAuthorized(getRules, getIdsFromRules, propsToTest); 
         var req = {
           method: 'GET', 
           baseUrl: '/api',
@@ -741,7 +741,7 @@ describe('http-req-auth',function(){
         var defaultOptions = {regExpMatch: false};
 
         var isAuthorized = 
-          flexAcl.makeIsAuthorized(getRules, getCodes, propsToTest, defaultOptions); 
+          flexAcl.makeIsAuthorized(getRules, getIdsFromRules, propsToTest, defaultOptions); 
         var req = {
           method: 'GET', 
           baseUrl: '/api',

@@ -87,7 +87,7 @@ describe('http-req-auth',function(){
 
     }); 
 
-    it('should match on pathname',function(done){
+    it('should match on path',function(done){
       var getRules = function(callback) {
         var rules = [
           {code: 'ClientAll',
@@ -116,7 +116,7 @@ describe('http-req-auth',function(){
       });
     }); 
 
-    it('should match on pathname case INsensitive',function(done){
+    it('should match on path case INsensitive',function(done){
       var getRules = function(callback) {
         var rules = [
           {code: 'ClientLi',
@@ -155,7 +155,7 @@ describe('http-req-auth',function(){
         expect(getCodes(matchedRules)).to.contain('ClientCr3'); 
       });
       
-      req = {method: 'POST', pathname: '/api/clien'};
+      req = {method: 'POST', path: '/api/clien'};
       getMatchedRules(req, getRules, function (err, matchedRules) {
         expect(matchedRules).to.have.length(0); 
         done();
@@ -163,8 +163,7 @@ describe('http-req-auth',function(){
 
     }); 
 
-
-    it('should match on pathname with regular expressions',function(done){
+    it('should match on path with regular expressions',function(done){
       var getRules = function(callback) {
         var rules = [
           {code: 'ClientAll',
@@ -211,7 +210,7 @@ describe('http-req-auth',function(){
 
     }); 
 
-    it('should match on pathname allowing variables',function(done){
+    it('should match on path allowing variables',function(done){
       var getVariables = function(callback) {
         var vars = {all: '.*', clientNbr: '2[a-z][0-9]'};
         return callback(null, vars);
@@ -230,7 +229,6 @@ describe('http-req-auth',function(){
            method: 'POST',
            baseUrl: '/api',
            path:'/clients/|clientNbr|'},
-           // pathname:'/api/clients/|clientNbr|'},
           ];
         return callback(null, rules); 
       }; 
@@ -314,14 +312,60 @@ describe('http-req-auth',function(){
         });
       });
 
-    }); 
+    }); // end of it should match on query parameters 
 
+    it('should not include rules w properties missing from req',function(done){
+      var getRules = function(callback) {
+        var rules = [
+          {code: 'ClientSort',
+           baseUrl: '/api',
+           path:'/clients',
+           'query':{'sort':'.*'}},
+          {code: 'ClientFilter',
+           baseUrl: '/api',
+           path:'/clients',
+           'query':{'filter':'.*'}},
+          {code: 'ClientAll',
+           method: 'GET',
+           baseUrl: '/api',
+           path:'/clients'},
+          ];
+        return callback(null, rules); 
+      }; 
 
-  });
+      getRules(function(err, rules) {
+
+        var propsToTest = flexAcl.getPropsFromRules(rules);
+        var getMatchedRules = flexAcl.makeGetMatchedRulesFn(propsToTest); 
+
+        var req = {method: 'GET', baseUrl: '/api', path:'/clients'};
+        getMatchedRules(req, getRules, function (err, matchedRules) {
+          expect(matchedRules).to.have.length(1); 
+          expect(getCodes(matchedRules)).to.contain('ClientAll');
+          // done();
+        });
+        req = {method: 'GET', baseUrl: '/api', path:'/clients',query:{filter:'abc123'}};
+        getMatchedRules(req, getRules, function (err, matchedRules) {
+          expect(matchedRules).to.have.length(2); 
+          expect(getCodes(matchedRules)).to.contain('ClientAll');
+          expect(getCodes(matchedRules)).to.contain('ClientFilter');
+        });
+        req = {method: 'GET', baseUrl: '/api', path:'/clients',query:{sort:'bogus'}};
+        getMatchedRules(req, getRules, function (err, matchedRules) {
+          expect(matchedRules).to.have.length(2); 
+          expect(getCodes(matchedRules)).to.contain('ClientAll');
+          expect(getCodes(matchedRules)).to.contain('ClientSort');
+          done();
+        });
+
+      });
+    });  
+
+  }); // end of describe
 
   describe('makeIsAuthorized', function() {
     
-    it('should make the isAuthorized fn without error',function(done){
+    it('should authorize various rules correctly',function(done){
       var getRules = function(callback) {
         var rules = [
           {code: 'ClientLi',
@@ -447,7 +491,7 @@ describe('http-req-auth',function(){
 
       var isAuthorized = flexAcl.makeIsAuthorized(getRules, getCodes); 
 
-      var req = {method: 'POST', pathname: '/api/client', user: {id:'admin'}};
+      var req = {method: 'POST', path: '/api/client', user: {id:'admin'}};
       isAuthorized(req, function (err, passes) {
         expect(err).not.to.be(null); 
         expect(passes).to.be(undefined); 
@@ -601,7 +645,7 @@ describe('http-req-auth',function(){
       }
     };
 
-    it('should default to method and pathname w/o propsToTest', 
+    it('should default to method and path w/o propsToTest', 
       function(done) {
 
       var req = {

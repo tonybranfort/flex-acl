@@ -7,7 +7,7 @@
     "test": "mocha test\\test.js"
   },
   "dependencies": {
-    "filter-objects": "1.1.x",
+    "filter-objects": "2.x",
     "lodash": "4.x.x"
   },
   "devDependencies": {

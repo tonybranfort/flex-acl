@@ -497,6 +497,50 @@ describe('http-req-auth',function(){
 
     });
 
+    it('should allow reg exp in getAuthznAclIds', function(done) {
+
+      var getRules = function(callback) {
+        var rules = [
+          {id: 'ClientLi',
+           method: 'GET',
+           baseUrl: '/api',
+           path:'/clients'},
+          {id: 'ClientCr',
+           method: 'POST',
+           baseUrl: '/api',
+           path:'/clients'},
+          ];
+        return callback(null, rules);
+      }; 
+
+      var getIdsFromRules = function(req, callback) {
+        // returns the access ids for the user making the http request
+        var authzdAclIds = {
+          admin: [/.*/],           // Access to all rules
+          paul:  [/^Client..$/],         // Access to all "Clientxx" rules
+          frank: ["Lada","ClientCr"],
+          jane:  ["ClientLi"],   // Access to just ClientLi rules
+          dot:  ["Client"],   // Access to just Client rules (none)
+          lola: ["aClientCr"],
+          baris: ["clientcr"],
+          borka: ["ClientCra"],
+          bolla: ["Client..."]
+        };
+
+        return callback(null, authzdAclIds[req.user.id]);
+      };
+
+      var isAuthorized = flexAcl.makeIsAuthorized(getRules, getIdsFromRules); 
+
+      var req = {method: 'POST', baseUrl: '/api', path:'/clients', user: {id:'paul'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).to.be(null); 
+        expect(passes).to.be(true); 
+        done();
+      });
+
+    });  
+
     it('should allow slow responses on getRules and getIdsFromRules ' + 
        'and execute in parallel', function(done) {
       this.timeout(5000); 

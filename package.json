@@ -1,17 +1,22 @@
 {
   "name": "flex-acl",
   "version": "1.0.0",
-  "description": "Easy to implement, very flexible json based acl",
+  "description": "Easy to implement, flexible json based acl",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha test\\test.js"
+    "test": "make test",
+    "cover": "istanbul cover ./node_modules/mocha/bin/_mocha",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
     "filter-objects": "2.x",
     "lodash": "4.x.x"
   },
   "devDependencies": {
-    "mocha":"2.2.x",
+    "coveralls": "2.11.x",
+    "istanbul": "0.4.x",
+    "mocha": "2.x",
+    "mocha-lcov-reporter": "^1.0.0",
     "expect.js": "0.3.x"
   },
   "repository": {

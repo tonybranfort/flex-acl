@@ -1,4 +1,7 @@
 # flex-acl
+[![Build Status via Travis CI](https://travis-ci.org/tonybranfort/flex-acl.svg?branch=master)](https://travis-ci.org/tonybranfort/flex-acl)
+[![Coverage Status](https://coveralls.io/repos/github/tonybranfort/flex-acl/badge.svg?branch=master)](https://coveralls.io/github/tonybranfort/flex-acl?branch=master)
+
 
 Authorize http requests with a json based authorization control list.  
 
@@ -104,6 +107,8 @@ isAuthorized(req, function (err, passes) {
 
 
 ```
+
+Tested on Node versions 0.10, 0.12, 4, 5, 6. 
 
 
 ##Documentation

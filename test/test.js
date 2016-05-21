@@ -816,6 +816,48 @@ describe('http-req-auth',function(){
   }); // end of describe 'options'
 
 
+  describe('getPropsFromRules', function() {
+    var rules = [
+      {id: 'ClientAll',
+       baseUrl:'/api',
+       path: '/clients'},
+      {id: 'ClientLi1',
+       method: 'GET',
+       baseUrl:'/api',
+       path: '/clients',
+       query: {filter: 'abc123'}},
+      {id: 'ClientLi2',
+       method: 'GET',
+       baseUrl:'/api',
+       path: '/clients',
+       note: 'href is for a note only...like this note',
+       href: '/api/clients?filter=abc12'},
+      ];
+
+    it('should return an array of properties', function() {
+      var props = flexAcl.getPropsFromRules(rules); 
+
+      expect(props.length).to.be(6);
+      expect(props).to.contain('baseUrl'); 
+      expect(props).to.contain('path'); 
+      expect(props).to.contain('method'); 
+      expect(props).to.contain('query.filter'); 
+      expect(props).to.contain('href'); 
+      expect(props).to.contain('note'); 
+    }); 
+
+    it('should return an array of properties and ignore ignoreProps', function() {
+      var props = flexAcl.getPropsFromRules(rules,['href','note']); 
+
+      console.log(props); 
+      expect(props.length).to.be(4);
+      expect(props).to.contain('baseUrl'); 
+      expect(props).to.contain('path'); 
+      expect(props).to.contain('method'); 
+      expect(props).to.contain('query.filter'); 
+    }); 
+
+  }); // end of describe getPropsFromRules
 
 });
 

@@ -541,6 +541,52 @@ describe('http-req-auth',function(){
 
     });  
 
+
+    it('should allow variables', function(done) { 
+
+      var variables = {clientNbr: '2[a-z][0-9]'};
+
+      var getRules = function(callback) {
+        var rules = [
+          {id: 'ClientLi',
+           method: 'GET',
+           baseUrl: '/api',
+           path:'/clients'},
+          {id: 'ClientCrt',
+           method: 'POST',
+           baseUrl: '/api',
+           path:'/clients/~clientNbr#'},
+          ];
+        return callback(null, rules); 
+      }; 
+
+      var getIdsFromRules = function(req, callback) {
+        // returns the access ids for the user making the http request
+        var authzdAclIds = {
+          sammy: ["ClientCrt"],
+        };
+
+        return callback(null, authzdAclIds[req.user.id]);
+      };
+
+      var options = {variablesInTObj:true, 'variables': variables}; 
+
+      var propsToTest = ['method',{'path':options}];
+      var isAuthorized = 
+      		flexAcl.makeIsAuthorized(getRules, getIdsFromRules, propsToTest); 
+
+      req = {method: 'POST', path:'/clients/2b7', user: {id:'sammy'}};
+      isAuthorized(req, function (err, passes) {
+        expect(err).to.be(null); 
+        expect(passes).to.be(true); 
+        done();
+      });
+
+
+    }); 
+
+
+
     it('should allow slow responses on getRules and getIdsFromRules ' + 
        'and execute in parallel', function(done) {
       this.timeout(5000); 
@@ -849,7 +895,6 @@ describe('http-req-auth',function(){
     it('should return an array of properties and ignore ignoreProps', function() {
       var props = flexAcl.getPropsFromRules(rules,['href','note']); 
 
-      console.log(props); 
       expect(props.length).to.be(4);
       expect(props).to.contain('baseUrl'); 
       expect(props).to.contain('path'); 

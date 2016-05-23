@@ -107,7 +107,7 @@ isAuthorized(req, function (err, passes) {
 
 ```
 
-Abbreviated example of implementing on Express (see Example folder for less abreviated example): 
+Abbreviated example of implementing on Express (see [example folder](https://github.com/tonybranfort/flex-acl/tree/master/test) for less abreviated example): 
 ```javascript
 
 var myapi = require('./app/modules/my-api');
@@ -156,6 +156,7 @@ Install with `npm install flex-acl`.
 
 #### Other Examples
 * [variables](#variables)
+* [expressjs implementation](https://github.com/tonybranfort/flex-acl/tree/master/example)
 
 ### <a name="howAuthorized" />Rules for authorizing a request 
 

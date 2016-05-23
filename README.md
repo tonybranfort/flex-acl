@@ -7,10 +7,10 @@ Authorize http requests with a json based authorization control list.
 
 Features: 
 * Simple to implement 
-* Json based acl rules 
-* Any property/ies in the request at any depth can be used for authorization
-* Variables can be used for repeated acl rule patterns 
+* JSON based acl rules 
+* Any property/ies in the http request at any depth can be used for authorization
 * Wide flexibility in establishing user groups and/or roles for authorizations
+* Variables can be used for repeated acl rule patterns 
 
 flex-acl does _not_ authenticate users.  Users should be authenticated before authorizing requests.   
 
@@ -46,8 +46,8 @@ var getAclRules = function(callback) {
 var getAuthzdAclIds = function(req, callback) {
   // returns the access ids for the user making the http request
   var authzdAclIds = {
-	admin: ['.*'],         // Access to all rules
-	paul:  ['Client.*'], // Access to all "Client" rules
+    admin: ['.*'],         // Access to all rules
+    paul:  ['Client.*'], // Access to all "Client" rules
     jane:  ['ClientGet'],  // Access to just viewing a client 
     dot:  ['ClientCrt','ClientGet','ClientPut'],  // Access to create,get,update clients
   };
@@ -105,25 +105,57 @@ isAuthorized(req, function (err, passes) {
   //passes => undefined
 });
 
+```
+
+Abbreviated example of implementing on Express (see Example folder for less abreviated example): 
+```javascript
+
+var myapi = require('./app/modules/my-api');
+
+app.use('/api', function (req, res, next) {
+	auth.isAuthorized(req, function(err) {
+		if(err) {
+      handleErrorAndRespond(err,req, res, 401); 
+    } else  {
+      next();
+    }
+	});
+});
+
+
+app.use(myapi);  // won't get to /api routes here if doesn't pass isAuthorized above 
+
+//---- my api: 
+
+app.get('/api/my', function (req, res) {
+    something.getMy(req.query, function(err, my){
+      if (err) {
+        error.handleErrorAndRespond(err,req, res); 
+      } else {
+        res.json(my); 
+      }
+    });
+  })
+
 
 ```
 
-Tested on Node versions 0.10, 0.12, 4, 5, 6. 
-
 
 ##Documentation
+Install with `npm install flex-acl`.  
+[Tested on Node versions 0.10, 0.12, 4, 5, 6](https://travis-ci.org/tonybranfort/flex-acl). 
 
 [Rules for authorizing a request](#howAuthorized)
 
-API 
-* [__makeIsAuthorized__](#makeIsAuthorized) returns [isAuthorized](#isAuthorized)
-  * [propsToTest](#propsToTest)
-  * [options](#options)
+#### API 
+* [`makeIsAuthorized`](#makeIsAuthorized) returns [`isAuthorized`](#isAuthorized)
+* Helper Functions
+  * [`getPropsFromRules`](#getPropsFromRules)
+  * [`makeGetMatchedRulesFn`](#makeGetMatchedRulesFn)
+  * [`setOptionsOnProps`](#setOptionsOnProps)
 
-Helper Functions
-* [getPropsFromRules](#getPropsFromRules)
-* [makeGetMatchedRulesFn](#makeGetMatchedRulesFn)
-* [setOptionsOnProps](#setOptionsOnProps)
+#### Other Examples
+* [variables](#variables)
 
 ### <a name="howAuthorized" />Rules for authorizing a request 
 
@@ -147,9 +179,8 @@ The http request is authorized based on these two rules :
   A regular expression test determines if an acl id retrieved from getAuthzdAclIds matches an acl id from a matched acl rule.  If an acl id retrieved from getAuthzdAclIds is a string, then it is converted to a regular expression with '^' and '$' appended to beginning and end of string respectively to anchor the start and end of regular expression, before performing the regular expression test. If that behaviour is not desired, simply include a regular expression object instead of a string. 
 
 
-<a name="matchingRuleExamples" />Examples on matching acl rules 
-
-Example using default [options](#options) except `query.filter` added to 'method', 'baseUrl'and 'path' as property to be tested. 
+<a name="matchingRuleExamples"></a>
+Examples on matching acl rules : using default [options](#options) with [`propsToTest`](#propsToTest) = [`query.filter`, `method`, `baseUrl`, `path`].  
 
 | example http request  | ACL Rule          | Matches  |
 | ------------- |-------------|:-----:|
@@ -163,7 +194,8 @@ Example using default [options](#options) except `query.filter` added to 'method
 | {method: 'POST', path: '/api/clients', query: {filter: '__dog__', sort: 'asc'}}| {path: '/api/clients', query: {filter: '__DOG__'}} | `false` |
 
 
-<a name="matchingAclIds" />Examples on matching authorized ACL ids with acl rules 
+<a name="matchingAclIds"></a>
+Examples on matching authorized ACL ids with acl rules 
 
 | authorized acl ids | ACL Rule (id only) | Is Authorized  | Comment |
 | ------------- |-------------------|:-----:|-----------------|
@@ -187,12 +219,12 @@ __Arguments__
 * `getAclRules(callback)` - Function which returns the acl rules.  The function is passed a `callback(err, aclRules)` which returns either an `err` or the acl rules which is an array of objects with each object having a property 'id' to uniquely identify it.  
 * `getAuthzdAclIds(request, callback)` - Function which returns the authorized ACL ids.  The function is passed the `request` object and a `callback(err, authzdIds)` which returns either an `err` or the acl ids which are authorized for this given request (likely for a given user or role which has already been authenticated in the request).  
 * [`propsToTest`](#propsToTest) - Optional collection of properties (and optional options per property) to be tested.  
-* `defaultOptions` - Optional object of options that should globally apply to all properties being tested if those options are set in `propsToTest`. See [options](#options).
+* `defaultOptions` - Optional object of [`options`](#options) to set global defaults. See `propsToTest` for how option values are applied from `propsToTest` through global defaults.  
 
 
 <a name="isAuthorized"></a>
 ### isAuthorized(req, callback)
-Function that is returned by calling [makeIsAuthorized](#makeIsAuthorized) and determines if an http request is authorized based on the ACL rules collection and the authorized ACL ids.   See [Rules for authorizing a request](#howAuthorized).  
+Function that is returned by calling [`makeIsAuthorized`](#makeIsAuthorized) and determines if an http request is authorized based on the ACL rules collection and the authorized ACL ids.   See [Rules for authorizing a request](#howAuthorized).  
 
 __Arguments__
 * `req` - The http request object. 
@@ -201,9 +233,9 @@ __Arguments__
 
 <a name="propsToTest"></a>
 ### propsToTest
-The collection of properties to be tested in [isAuthorized](#isAuthorized). Every property included in this collection is tested for a match between the http request and the acl rules.  See [Rules for authorizing a request](#howAuthorized).
+The collection of properties to be tested in [`isAuthorized`](#isAuthorized). Every property included in this collection is tested for a match between the http request and the acl rules.  See [Rules for authorizing a request](#howAuthorized).
 
-Optional collection passed into makeIsAuthorized.  Default is ['path', 'baseUrl', 'method'].  (See helper function [getPropsFromRules](#getPropsFromRules) to get all unique properties from an acl rules collection.) 
+Default is ['path', 'baseUrl', 'method'].  See helper function [`getPropsFromRules`](#getPropsFromRules) to get all unique properties from an acl rules collection. 
 
 ['options'](#options) values can be set for any specific property by using format allowed by [filter-objects propsToTest](https://github.com/tonybranfort/filter-objects#propsToTest).
 
@@ -213,12 +245,10 @@ Option values for a given property are set based on the following heirarchy (fir
 ```javascript
 	{'method': {
 	   'regExpMatch': false,
-	   'regExpIgnoreCase': false,
-	   'variablesInTObj': false},
+	   'regExpIgnoreCase': false},
 	 'query': {
 	   'regExpMatch': true,
-	   'regExpIgnoreCase': false,
-	   'variablesInTObj': false},
+	   'regExpIgnoreCase': false},
 	}; 
 ```
   3. `defaultOptions` parameter passed into [`makeIsAuthorized`](#makeIsAuthorized)
@@ -269,11 +299,11 @@ The `options` object :
 * determines `method` and `query` property specific defaults for `flex-acl`.  See [`propsToTest`](#propsToTest).
 * can be applied for each specific property.  See [`propsToTest`](#propsToTest).
 
-See [`propsToTest`](#propsToTest) for which properties are tested, setting option values specific to properties and the order of heirarchy for setting options values.  
+See [`propsToTest`](#propsToTest) for setting which properties are tested, setting option values specific to properties and the order of heirarchy for options values.  
 
 Acl rules are matched from an http request using [filter-objects](https://github.com/tonybranfort/filter-objects) `makeFilterFn` / `filter`.  As such it uses the same options object which is shown below.  The default values are specific to `flex-acl`. 
 
-In the options object, TObj is the acl rule and PObj is the http request object. 
+In the options object, TObj ('target object') is the acl rule and PObj ('pattern object') is the http request object. 
 
 ```javascript
 var globalDefaultOptions = {
@@ -294,16 +324,50 @@ var globalDefaultOptions = {
 
 See [Rules for authorizing a request](#howAuthorized) for general discussion and examples. 
 
+<a name="getPropsFromRules"></a>
+### getPropsFromRules
+Returns an array of strings in dot notation form that are the keys of objects in a rules collection. Intended as a helper function to get the properties needed for [`propsToTest`](#propsToTest). 
+
+
+__Arguments__
+* `rules` - Acl rules collection (any array of objects). 
+* `keysToIgnore` - Optional array of strings which will not be returned from `getPropsFromRules` even if it is a key in a rules object. Default: ['id'].  
+
+Example
+```javascript
+var rules = [
+  {id: 'ClientAll',
+   baseUrl:'/api',
+   path: '/clients'},
+  {id: 'ClientLi1',
+   method: 'GET',
+   baseUrl:'/api',
+   path: '/clients',
+   query: {filter: 'abc123'}},
+  {id: 'ClientLi2',
+   method: 'GET',
+   baseUrl:'/api',
+   path: '/clients',
+   note: 'href is for a note only...like this note',
+   href: '/api/clients?filter=abc12'},
+  ];
+
+var props = flexAcl.getPropsFromRules(rules,['href','note']); 
+
+console.log(props); 
+// [ 'baseUrl', 'path', 'method', 'query.filter' ]
+
+```
 
 <a name="makeGetMatchedRulesFn"></a>
 ### makeGetMatchedRulesFn
-Returns a function which will return the matched rules given a request.  This is the function used by `makeIsAuthorized`.  Is exposed here for testing which acl rules are actually matched for a request. 
+Returns a function which will return the matched rules given a request.  This is the function used by `makeIsAuthorized`.  Is exposed for testing which acl rules are actually matched for a request. 
 
 __Arguments__
 * [`propsToTest`](#propsToTest) - Optional collection of properties (and optional options per property) to be tested.  
 * `defaultOptions` - Optional object of options that should globally apply to all properties being tested if those options are set in `propsToTest`. See [options](#options).
 
-Function that is called with these arguments: 
+Function that is returned is called with these arguments: 
 * `req` - The http request object. 
 * `getAclRules(callback)` - Function which returns the acl rules.  The function is passed a `callback(err, aclRules)` which returns either an `err` or the acl rules which is an array of objects with each object having a property 'id' to uniquely identify it.  
 * `callback(err, matchedRules)` - If no `err` callback function is called with the acl rules that matched the request.  
@@ -345,7 +409,7 @@ getMatchedRules(req, getRules, function (err, matchedRules) {
 Sets every option value for each property based on the [`propsToTest`](#propsToTest) and default [`options`](#options) rules.  `setOptionsOnProps` is called by [`makeIsAuthorized`](#makeIsAuthorized) so does not need to be called.  Is exposed as a helper function to see every property option that is set. 
 
 __Arguments__
-* [propsToTest](#propsToTest) 
+* [`propsToTest`](#propsToTest) 
 * `defaultOptions` - Optional object of options that should globally apply to all properties being tested if those options are set in `propsToTest`. See [options](#options).
 
 ```javascript
@@ -423,43 +487,53 @@ console.log(propsWithOptions);
  */
 ```
 
-<a name="getPropsFromRules"></a>
-### getPropsFromRules
-Returns an array of strings in dot notation form that are the keys of objects in a rules collection. Intended as a helper function to get the properties needed for [propsToTest](#propsToTest). 
+<a name="variables"></a>
+### Using Variables
+Variables can be used for patterns that repeat in matching the ACL rules.  In [`options`](#options), set `variablesInTObj` to `true` ('TObj = target object which is the acl rules collection') and `variables` to the collection of variable names with their values.  The default start and end strings for identifying a variable name in an ACL rule is '~' and '#' respectively.  These can be modified in `options` with the `variablesStartStr` and `variablesEndStr` option values. 
 
-
-__Arguments__
-* `rules` - Acl rules collection (any array of objects). 
-* `keysToIgnore` - Optional array of strings which will not be returned from `getPropsFromRules` even if it is a key in a rules object. Default: ['id'].  
+`flex-acl` uses [`filter-objects`](https://www.npmjs.com/package/filter-objects) to match acl rules.  See [filter-objects variables](https://www.npmjs.com/package/filter-objects#variables) for futher details.  See flex-acl [options](#options) for default values for variable options including start and end strings. 
 
 Example
 ```javascript
-var rules = [
-  {id: 'ClientAll',
-   baseUrl:'/api',
-   path: '/clients'},
-  {id: 'ClientLi1',
-   method: 'GET',
-   baseUrl:'/api',
-   path: '/clients',
-   query: {filter: 'abc123'}},
-  {id: 'ClientLi2',
-   method: 'GET',
-   baseUrl:'/api',
-   path: '/clients',
-   note: 'href is for a note only...like this note',
-   href: '/api/clients?filter=abc12'},
-  ];
 
-var props = flexAcl.getPropsFromRules(rules,['href','note']); 
+var variables = {clientNbr: '2[a-z][0-9]'};
 
-console.log(props); 
-// [ 'baseUrl', 'path', 'method', 'query.filter' ]
+var getRules = function(callback) {
+  var rules = [
+    {id: 'ClientLi',
+     method: 'GET',
+     baseUrl: '/api',
+     path:'/clients'},
+    {id: 'ClientCrt',
+     method: 'POST',
+     baseUrl: '/api',
+     path:'/clients/~clientNbr#'},   // '~clientNbr#' will be replaced with '2[a-z][0-9]'
+    ];
+  return callback(null, rules); 
+}; 
+
+var getIdsFromRules = function(req, callback) {
+  // returns the access ids for the user making the http request
+  var authzdAclIds = {
+    sammy: ["ClientCrt"],
+  };
+
+  return callback(null, authzdAclIds[req.user.id]);
+};
+
+var options = {variablesInTObj:true, 'variables': variables}; 
+
+// set variables on just those properties on which they'll be used
+var propsToTest = ['method',{'path':options}];
+var isAuthorized = 
+    flexAcl.makeIsAuthorized(getRules, getIdsFromRules, propsToTest); 
+
+req = {method: 'POST', path:'/clients/2b7', user: {id:'sammy'}};
+isAuthorized(req, function (err, passes) {
+  // err => null
+  // passes => true
+});
+
 
 ```
-
-
-
-
-
 

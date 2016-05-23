@@ -754,7 +754,9 @@ describe('http-req-auth',function(){
       function(done) {
 
       getRules(function(err, rules) {
-        var propsToTest = flexAcl.getPropsFromRules(rules);
+        var propsToTestObj = flexAcl.getPropsFromRules(rules);
+        console.log(propsToTest); 
+        var propsToTest = Object.keys(propsToTestObj); 
         expect(propsToTest.length).to.be(5) ;
         expect(propsToTest).to.contain('method');
         expect(propsToTest).to.contain('path');
@@ -881,19 +883,31 @@ describe('http-req-auth',function(){
       ];
 
     it('should return an array of properties', function() {
-      var props = flexAcl.getPropsFromRules(rules); 
+      var propsObj = flexAcl.getPropsFromRules(rules); 
+
+      var props = Object.keys(propsObj); 
 
       expect(props.length).to.be(6);
+
+      expect(Object.keys(propsObj.baseUrl).length).to.be(0); 
+      expect(Object.keys(propsObj.path).length).to.be(0); 
+      expect(Object.keys(propsObj.method).length).to.be(0); 
+      expect(Object.keys(propsObj['query.filter']).length).to.be(0); 
+      expect(Object.keys(propsObj.href).length).to.be(0); 
+      expect(Object.keys(propsObj.note).length).to.be(0); 
+
       expect(props).to.contain('baseUrl'); 
       expect(props).to.contain('path'); 
       expect(props).to.contain('method'); 
       expect(props).to.contain('query.filter'); 
       expect(props).to.contain('href'); 
-      expect(props).to.contain('note'); 
+      expect(props).to.contain('note');
     }); 
 
     it('should return an array of properties and ignore ignoreProps', function() {
-      var props = flexAcl.getPropsFromRules(rules,['href','note']); 
+      var propsObj = flexAcl.getPropsFromRules(rules,['href','note']); 
+
+      var props = Object.keys(propsObj); 
 
       expect(props.length).to.be(4);
       expect(props).to.contain('baseUrl'); 

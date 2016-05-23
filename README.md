@@ -326,12 +326,12 @@ See [Rules for authorizing a request](#howAuthorized) for general discussion and
 
 <a name="getPropsFromRules"></a>
 ### getPropsFromRules
-Returns an array of strings in dot notation form that are the keys of objects in a rules collection. Intended as a helper function to get the properties needed for [`propsToTest`](#propsToTest). 
+Returns an object with keys in dot notation that are the keys of from the acl rules collection. Intended as a helper function to get the properties needed for [`propsToTest`](#propsToTest). 
 
 
 __Arguments__
 * `rules` - Acl rules collection (any array of objects). 
-* `keysToIgnore` - Optional array of strings which will not be returned from `getPropsFromRules` even if it is a key in a rules object. Default: ['id'].  
+* `keysToIgnore` - Optional array of strings which will not be included in the returned object from `getPropsFromRules` even if it is a key in a rules object. Default: ['id'].  
 
 Example
 ```javascript
@@ -355,7 +355,13 @@ var rules = [
 var props = flexAcl.getPropsFromRules(rules,['href','note']); 
 
 console.log(props); 
-// [ 'baseUrl', 'path', 'method', 'query.filter' ]
+// { baseUrl: {}, path: {}, method: {}, 'query.filter': {} }
+
+// Object can now be modified with property specific options
+props.path.variablesInTObj = true; 
+props.path.variables = {year: '[1,2][0-9]{3}'}
+
+var isAuthorized = flexAcl.makeIsAuthorized(getAclRules, getAuthzdAclIds, props);
 
 ```
 

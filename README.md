@@ -141,22 +141,27 @@ app.get('/api/my', function (req, res) {
 ```
 
 
-##Documentation
 Install with `npm install flex-acl`.  
-[Tested on Node versions 0.10, 0.12, 4, 5, 6](https://travis-ci.org/tonybranfort/flex-acl). 
+[Tested on Node versions 0.10, 0.12, 4, 5, 6](https://travis-ci.org/tonybranfort/flex-acl).  
 
-[Rules for authorizing a request](#howAuthorized)
+##Documentation
+[Rules for authorizing a request](#howAuthorized)  
 
-#### API 
-* [`makeIsAuthorized`](#makeIsAuthorized) returns [`isAuthorized`](#isAuthorized)
-* Helper Functions
+####API
+  [`makeIsAuthorized`](#makeIsAuthorized) returns [`isAuthorized`](#isAuthorized)
+
+  Helper Functions
   * [`getPropsFromRules`](#getPropsFromRules)
   * [`makeGetMatchedRulesFn`](#makeGetMatchedRulesFn)
   * [`setOptionsOnProps`](#setOptionsOnProps)
 
-#### Other Examples
+####Other Examples
 * [variables](#variables)
 * [expressjs implementation](https://github.com/tonybranfort/flex-acl/tree/master/example)
+
+####[Performance](#performance)
+
+
 
 ### <a name="howAuthorized" />Rules for authorizing a request 
 
@@ -543,4 +548,27 @@ isAuthorized(req, function (err, passes) {
 
 
 ```
+
+<a name="performance"></a>
+#### Performance
+No structured, rigorous performance tests have been performed but here are performance results given the following environment and example : 
+* Using aws t2.micro instance running Amazon Linux as web server running nodejs 4.4, expressjs 4.13
+* flex-acl setup and rules as shown in [flex-acl example app/modules/auth folder](https://github.com/tonybranfort/flex-acl/tree/master/example) where the rules and authorized acl id collections are loaded upon server startup and which has:  
+  * 50 acl rules
+  * testing 6 properties (`method`,`baseUrl`,`path`, `query.fieldset`,`query.filter`,`query.filterfields`)
+  * check and replace variables on 1 property (`path`) using 6 variables
+  * 10-13 authorized acl ids for each of 3 user roles  
+* Generally available processor and memory; running one instance of the application with several hundred tests running consecutively hitting all acl rules and checking isAuthorized 5,310 times.  
+
+Yielded these results: 
+
+|| Response time in milliseconds |
+|------------|:------------------------------:|
+|median|0.828|
+|average|0.978|
+|90th percentile|1.093 |
+|95th percentile|1.243 |
+|99th percentile|3.683 |
+|min|0.541|
+|max|22.022 | 
 

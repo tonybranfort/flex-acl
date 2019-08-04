@@ -107,7 +107,7 @@ isAuthorized(req, function (err, passes) {
 
 ```
 
-Abbreviated example of implementing on Express (see [example folder](https://github.com/tonybranfort/flex-acl/tree/master/test) for less abreviated example): 
+Abbreviated example of implementing on Express (see [example folder](https://github.com/tonybranfort/flex-acl/tree/master/test) for less abbreviated example): 
 ```javascript
 
 var myapi = require('./app/modules/my-api');
